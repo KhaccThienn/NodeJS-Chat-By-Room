@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Login</title>
+    <title>Demo - Chat App</title>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta
@@ -18,26 +18,29 @@
     />
   </head>
   <body>
+    <!-- Login Panel -->
     <div class="container p-3">
       <form id="my-form">
+        <div class="text-center h3">Login Panel</div>
         <div class="form-group">
           <label for="name">Username</label>
           <input
             type="text"
             id="username"
             name="username"
-            class="form-control"
+            class="form-control rounded-0"
             placeholder="Username"
             aria-describedby="helpId"
           />
         </div>
 
         <div class="form-group">
-          <label for="">Chọn Phòng</label>
-          <select class="form-control" name="room" id="room">
-            <option value="room-1">Room 1</option>
-            <option value="room-2">Room 2</option>
-            <option value="room-3">Room 3</option>
+          <label for="">Choose The Room: </label>
+          <select class="form-control rounded-0" name="room" id="room">
+            <option value="room-1">Room 1: "Mystical Minds"</option>
+            <option value="room-2">Room 2: "The Unusual Suspects"</option>
+            <option value="room-3">Room 3: "The Bizarre Bunch"</option>
+            <option value="room-4">Room 4: "The Odd Squad"</option>
           </select>
         </div>
 
@@ -50,21 +53,28 @@
         </button>
       </form>
     </div>
+    <!-- End Login Panel -->
 
+    <!-- Chat Page -->
     <div class="container-fluid p-3" id="chat-page">
+      <div class="text-center h3">
+        Room Chat: <span id="room-name"></span>
+      </div>
       <div class="row">
-        <div class="col-lg-4">
+        <!-- Show list users -->
+        <div class="col-lg-4 col-md-8">
           <p>List User</p>
           <ul class="list-group" id="listUser"></ul>
         </div>
+
+        <!-- show list chats -->
         <div class="col-lg-8">
           <p>Chats</p>
-          <ul class="list-group" id="contents">
-            
-          </ul>
+          <ul class="list-group" id="contents"></ul>
         </div>
       </div>
       <div class="fixed-bottom pb-3">
+        <!-- Form input for sending message -->
         <form id="form-submit">
           <div class="row align-items-center">
             <div class="col-lg-9">
@@ -72,7 +82,7 @@
                 type="text"
                 name=""
                 id="messages"
-                class="form-control"
+                class="form-control rounded-0"
                 placeholder="Type message here"
                 aria-describedby="helpId"
               />
@@ -90,6 +100,8 @@
         </form>
       </div>
     </div>
+    <!-- End Chat Page -->
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script
@@ -119,22 +131,49 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-      const socket = io();
       $("#chat-page").css("display", "none");
+      const socket = io();
+      
       $("#my-form").submit(() => {
         let username = $("#username").val();
         let room = $("#room").val();
+        if (username == "") {
+          $("#username").addClass("is-invalid");
+          Swal.fire({
+            width: "30%",
+            position: "center",
+            icon: "error",
+            title: "Name can not be blank",
+            showCloseButton: true,
+            timer: 2000,
+            heightAuto: true,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } else {
+          let userData = {
+            username: username,
+            room: room,
+          };
 
-        let userData = {
-          username: username,
-          room: room,
-        };
-        socket.emit("join", userData);
-
-        $("#my-form").css("display", "none");
-        $("#chat-page").css("display", "block");
+          socket.emit("join", userData);
+          $("#room-name").html(userData.room);
+          $("#my-form").css("display", "none");
+          $("#chat-page").css("display", "block");
+          Swal.fire({
+            width: "40%",
+            position: "center",
+            icon: "success",
+            title: `Welcome to server: '${userData.room}'`,
+            showCloseButton: true,
+            timer: 2000,
+            heightAuto: true,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
 
         return false;
       });
@@ -144,23 +183,30 @@
         $("#listUser").html("<div></div>");
         userData.map((item) => {
           $("#listUser").append(
-            `<li class="listUser list-group-item">
-                    ${item.username}
-                </li>`
+            `<li class="listUser list-group-item rounded-0">
+                ${item.username}
+              </li>`
           );
         });
       });
 
       $("#form-submit").submit(() => {
         let content = $("#messages").val();
-        console.log(content);
-        socket.emit("send-mess", {content});
+        if (content == "") {
+          $("#messages").addClass("is-invalid");
+        } else {
+          console.log(content);
+
+          socket.emit("send-mess", { content });
+        }
         return false;
       });
 
-      socket.on('send',(mess)=>{
-        $('#contents').append(`<li class="list-group-item">${mess}</li>`)
-     })
+      socket.on("send", (mess) => {
+        $("#contents").append(
+          `<li class="list-group-item rounded-0">${mess}</li>`
+        );
+      });
     </script>
   </body>
 </html>

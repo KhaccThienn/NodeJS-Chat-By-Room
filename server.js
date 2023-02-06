@@ -7,10 +7,30 @@ const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/login.html'));
+    res.sendFile(path.join(__dirname, '/chat-app.html'));
 });
 
 var listUsers = [];
+
+var rooms = [
+    {
+        id: "room-1",
+        name: "Mystical Minds"
+    },
+    {
+        id: "room-2",
+        name: "The Unusual Suspects"
+    },
+    {
+        id: "room-3",
+        name: "The Bizarre Bunch"
+    },
+    {
+        id: "room-4",
+        name: "The Odd Squad"
+    }
+];
+
 
 io.on("connection", (socket) => {
     socket.on("join", (data) => {
@@ -22,12 +42,15 @@ io.on("connection", (socket) => {
         });
 
         socket.join(data.room);
-        let userroom = listUsers.filter(user => user.room === data.room);
-        
-        io.to(data.room).emit("user_join", userroom);
+        let user_room = listUsers.filter(user => user.room === data.room);
 
+        io.to(data.room).emit("user_join", user_room);
+        io.to(data.room).emit("send", "<small class='text-danger'>System: " + data.username + " joined " + data.room + "</small>");
         socket.on("send-mess", (mess) => {
             io.to(data.room).emit("send", `${data.username}: ${mess.content}`)
+        });
+        socket.on("disconnecting", () => {
+            io.to(data.room).emit("send", "<small class='text-danger'>System: " +data.username + " left</small>"); 
         });
     });
 
