@@ -20,9 +20,15 @@ io.on("connection", (socket) => {
             username: data.username,
             room: data.room
         });
+
         socket.join(data.room);
-        let userroom = listUsers.filter(user => user.room === data.room)
+        let userroom = listUsers.filter(user => user.room === data.room);
+        
         io.to(data.room).emit("user_join", userroom);
+
+        socket.on("send-mess", (mess) => {
+            io.to(data.room).emit("send", `${data.username}: ${mess.content}`)
+        });
     });
 
     socket.on("disconnecting", () => {
