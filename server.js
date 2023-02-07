@@ -14,6 +14,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/chat-app.html'));
 });
 
+// app.get("/:id",(req, res) => {
+//     res.sendFile(path.join(__dirname, '/private-chat.html'));
+// });
+
 // khai báo mảng list user để lưu thông tin của tất cả user
 var listUsers = [];
 
@@ -48,6 +52,10 @@ io.on("connection", (socket) => {
         // server lắng nghe sự kiện disconnect khi có người rời phòng chat
         socket.on("disconnecting", () => {
             // phát message có người thoát server
+            listUsers = listUsers.filter(user => user.id !== socket.id);
+            user_room = listUsers.filter(user => user.room === data.room);
+
+            io.to(data.room).emit("user_join", user_room);
             io.to(data.room).emit("send", "<small class='text-danger'>System: " +data.username + " left the room</small>"); 
         });
     });
@@ -62,4 +70,4 @@ io.on("connection", (socket) => {
 
 server.listen(3000, () =>{
     console.log(`App listening on: http://localhost:3000`);
-})
+});

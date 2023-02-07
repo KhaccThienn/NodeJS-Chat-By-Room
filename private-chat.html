@@ -18,43 +18,6 @@
     />
   </head>
   <body>
-    <!-- Login Panel -->
-    <div class="container p-3">
-      <form id="my-form">
-        <div class="text-center h3">Login Panel</div>
-        <div class="form-group">
-          <label for="name">Username</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            class="form-control rounded-0"
-            placeholder="Username"
-            aria-describedby="helpId"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="">Choose The Room: </label>
-          <select class="form-control rounded-0" name="room" id="room">
-            <option value="room-1">Room 1: "Mystical Minds"</option>
-            <option value="room-2">Room 2: "The Unusual Suspects"</option>
-            <option value="room-3">Room 3: "The Bizarre Bunch"</option>
-            <option value="room-4">Room 4: "The Odd Squad"</option>
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          id="submit"
-          class="btn btn-block btn-outline-dark rounded-0"
-        >
-          Join
-        </button>
-      </form>
-    </div>
-    <!-- End Login Panel -->
-
     <!-- Chat Page -->
     <div class="container-fluid p-3" id="chat-page">
       <div class="text-center h3">
@@ -133,8 +96,6 @@
     ></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-      // trong lần tải đầu tiên, ẩn chat page
-      $("#chat-page").css("display", "none");
       // require the plugin socket.io
       const socket = io();
       
@@ -195,19 +156,10 @@
         $("#listUser").html("<div></div>");
         // duyệt mảng userdata, lấy ra tất cả tên ng dùng có mặt trong grchat
         userData.map((item) => {
-          if(item.id === socket.id){
-            var messsage = `
-            <a href='/${item.id}' class="listUser disabled list-group-item list-group-item-action rounded-0">
-              ${item.username}
-            </a>`
-          } else {
-            var messsage = `
-            <a href='/${item.id}' class="listUser text-primary   list-group-item list-group-item-action rounded-0">
-              ${item.username}
-            </a>`
-          }
           $("#listUser").append(
-            messsage
+            `<li class="listUser list-group-item rounded-0">
+                ${item.username}
+              </li>`
           );
         });
       });
