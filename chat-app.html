@@ -133,16 +133,23 @@
     ></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+      // trong lần tải đầu tiên, ẩn chat page
       $("#chat-page").css("display", "none");
+      // require the plugin socket.io
       const socket = io();
       
+      // xử lý sự kiện submit form đăng ký
       $("#my-form").submit(() => {
+        // lấy ra tên người dùng từ form có id = username
         let username = $("#username").val();
+        // lấy ra tên phòng tự bộ select - option
         let room = $("#room").val();
+        // validate form input bắt buộc phải nhập
         if (username == "") {
+          // hiện lỗi trên form
           $("#username").addClass("is-invalid");
+          // hiện lỗi trên trang bằng SweetAlert2
           Swal.fire({
-            width: "30%",
             position: "center",
             icon: "error",
             title: "Name can not be blank",
@@ -153,17 +160,20 @@
             showConfirmButton: false,
           });
         } else {
+          // 1 object userData chứa các thông tin username và phòng
           let userData = {
             username: username,
             room: room,
           };
-
+          // phát ra sự kiện join, kèm theo userdata để server nhận
           socket.emit("join", userData);
+          // in tên phòng theo mỗi room
           $("#room-name").html(userData.room);
+          // sau khi vào phòng, ẩn login panel, hiện chat page
           $("#my-form").css("display", "none");
           $("#chat-page").css("display", "block");
+          // thông báo vào phòng thành công
           Swal.fire({
-            width: "40%",
             position: "center",
             icon: "success",
             title: `Welcome to server: '${userData.room}'`,
@@ -174,13 +184,15 @@
             showConfirmButton: false,
           });
         }
-
         return false;
       });
 
+      // client lắng nghe sự kiện userjoin
       socket.on("user_join", (userData) => {
         console.log(userData);
+        // reset list user 
         $("#listUser").html("<div></div>");
+        // duyệt mảng userdata, lấy ra tất cả tên ng dùng có mặt trong grchat
         userData.map((item) => {
           $("#listUser").append(
             `<li class="listUser list-group-item rounded-0">
@@ -190,18 +202,21 @@
         });
       });
 
+      // xử lý sự kiện submit trong form nhập tin nhắn
       $("#form-submit").submit(() => {
+        // lấy ra message trong form tin nhắn
         let content = $("#messages").val();
+        // validate form message
         if (content == "") {
           $("#messages").addClass("is-invalid");
         } else {
           console.log(content);
-
+          // client phát ra sự kiện send-mess
           socket.emit("send-mess", { content });
         }
         return false;
       });
-
+      // client lắng nghe sự kiện send
       socket.on("send", (mess) => {
         $("#contents").append(
           `<li class="list-group-item rounded-0">${mess}</li>`
